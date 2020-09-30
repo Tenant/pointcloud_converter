@@ -11,35 +11,37 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# QtCreator supports the following variables for Android, which are identical to qmake Android variables.
-# Check http://doc.qt.io/qt-5/deployment-android.html for more information.
-# They need to be set before the find_package(Qt5 ...) call.
-
-#if(ANDROID)
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-#    if (ANDROID_ABI STREQUAL "armeabi-v7a")
-#        set(ANDROID_EXTRA_LIBS
-#            ${CMAKE_CURRENT_SOURCE_DIR}/path/to/libcrypto.so
-#            ${CMAKE_CURRENT_SOURCE_DIR}/path/to/libssl.so)
-#    endif()
-#endif()
-
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Xml REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+        roscpp
+        rospy
+        sensor_msgs
+        std_msgs
+        message_generation
+        rosbag
+        pcl_ros
+        tf)
 
-if(ANDROID)
-  add_library(pointcloud_converter SHARED
-    main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
-  )
-else()
-  add_executable(pointcloud_converter
-    main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
-  )
-endif()
+include_directories(
+    ${catkin_INCLUDE_DIRS}
+    ${Qt5Core_INCLUDE_DIRS}
+    ${Qt5Xml_INCLUDE_DIRS}
+    .
+    include)
 
-target_link_libraries(pointcloud_converter PRIVATE Qt5::Widgets)
+aux_source_directory(src DIR_ROOT_SRC)
+
+add_executable(pointcloud_converter
+  main.cpp
+  mainwindow.cpp
+  mainwindow.h
+  mainwindow.ui
+  ${DIR_ROOT_SRC})
+
+target_link_libraries(pointcloud_converter
+    PRIVATE Qt5::Widgets
+    ${catkin_LIBRARIES}
+    ${Qt5Core_LIBRARIES}
+    ${Qt5Xml_LIBRARIES})
